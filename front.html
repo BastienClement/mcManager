@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2013-2014 Bastien Cl�ment
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html ng-app="mcManager">
+<head>
+    <meta charset="utf8">
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700" rel="stylesheet" type="text/css">
+    <!-- Please don't use this -->
+    <!--<link href="http://libs.galedric.me/entypo/1.0/css/fontello.css" rel="stylesheet" type="text/css">-->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: "Open Sans";
+            font-size: 13px;
+            -webkit-user-select: none;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
+        }
+
+        input, select {
+            padding: 5px;
+            font-size: 13px;
+        }
+
+        button {
+            padding: 5px 10px;
+        }
+
+        .box {
+            background: #eee;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        #login {
+            margin: 30px;
+            width: 250px;
+            padding: 50px;
+        }
+
+            #login input {
+                display: block;
+                width: 100%;
+                margin: 10px 0px;
+            }
+
+            #login button {
+                display: block;
+                margin: auto;
+            }
+
+        #loginText {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 300;
+        }
+
+        #loginText2 {
+            margin-bottom: 35px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 300;
+        }
+
+        #loginError {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #notify {
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            width: 400px;
+            position: fixed;
+            top: 0px;
+            left: 50%;
+            margin-left: -200px;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+            color: #fff;
+            text-align: center;
+            transition: opacity .3s ease;
+            overflow: hidden;
+            box-sizing: border-box;
+            opacity: 0;
+            text-shadow: none;
+            z-index: 100000;
+        }
+
+            #notify.active {
+                opacity: 1;
+            }
+
+        #bsod {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            z-index: 10000000000000;
+            background: rgba(0, 0, 115, 0.8);
+            text-shadow: none;
+        }
+
+        #bsodText {
+            color: #fff;
+            width: 500px;
+            margin: auto;
+            margin-top: 100px;
+            font-size: 14px;
+        }
+
+        #bsodTitle {
+            background: #000;
+            width: 100px;
+            text-align: center;
+            margin: auto;
+            padding: 5px;
+            margin-bottom: 50px;
+        }
+
+        #main {
+            margin: 30px;
+            width: 700px;
+            padding: 10px 30px;
+        }
+
+        .server {
+            margin: 20px 0;
+            background: rgba(255,255,255,0.5);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+            padding: 15px;
+        }
+
+        h2 {
+            font-weight: 300;
+            font-size: 18px;
+        }
+
+            h2 span {
+                font-size: 13px;
+                margin-left: 10px;
+                color: #999;
+            }
+
+        .status {
+            height: 15px;
+            width: 15px;
+            float: left;
+            border-radius: 15px;
+            background: #C00;
+            box-shadow: 0px 0px 5px #C00;
+            position: relative;
+            top: 5px;
+            margin-right: 10px;
+            transition: all .3s ease;
+        }
+
+            .status.on {
+                background: #0C0;
+                box-shadow: 0px 0px 5px #0C0;
+            }
+
+            .status.pending {
+                background: #EC0;
+                box-shadow: 0px 0px 5px #EC0;
+            }
+
+        .buttons {
+            float: right;
+            margin-top: -3px;
+        }
+
+        .serverInfos {
+            margin-top: 10px;
+        }
+
+            .serverInfos li {
+                display: inline;
+                margin-right: 10px;
+            }
+
+        .serverConsole {
+            margin-top: 10px;
+            background: #000;
+            color: #fff;
+            text-shadow: none;
+            font-family: "Consolas", monospace;
+            word-wrap: break-word;
+            overflow: hidden;
+            height: 451px;
+            line-height: 16px;
+            position: relative;
+            -webkit-user-select: text;
+        }
+
+        .serverConsoleBody {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+        }
+
+        .serverConsoleInput {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 10px;
+            font-family: Consolas, monospace;
+        }
+
+        .serverSnapshots {
+            margin-top: 10px;
+        }
+
+            .serverSnapshots td {
+                padding-bottom: 5px;
+            }
+
+        .serverSnapshotWorld, .serverSnapshotDate {
+            padding-right: 20px;
+        }
+
+        .serverSnapshotDate {
+            color: #999;
+        }
+
+        .serverSnapshotBtns button {
+            padding: 0px 5px;
+            padding-right: 7px;
+        }
+
+        .serverSnapshotCreate {
+            margin-top: 10px;
+        }
+
+            .serverSnapshotCreate select {
+                width: 213px;
+            }
+
+        #mainBtn {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        var mcManager = angular.module("mcManager", [], function() { });
+
+        var $s;
+        mcManager.controller("main", function($scope) {
+            $s = $scope;
+            $scope.safeApply = function(fn) {
+                var phase = this.$root.$$phase;
+                if(phase == '$apply' || phase == '$digest') {
+                    if(fn && (typeof (fn) === 'function')) {
+                        fn();
+                    }
+                } else {
+                    this.$apply(fn);
+                }
+            };
+
+            $scope.dead = false;
+            $scope.bsodText = "inconnue";
+            $scope.kill = function(text) {
+                if($scope.dead) return;
+                $scope.bsodText = text;
+                $scope.dead = true;
+                $scope.safeApply();
+            };
+
+            $scope.notifyVisible = false;
+            $scope.notifyText = "";
+
+            var notifyTimeout;
+            $scope.notify = function(text) {
+                document.getElementById("notify").style.display = "block";
+
+                $scope.notifyText = text;
+                $scope.notifyVisible = true;
+                $scope.safeApply();
+
+                if(notifyTimeout)
+                    clearTimeout(notifyTimeout);
+
+                notifyTimeout = setTimeout(function() {
+                    $scope.notifyVisible = false;
+                    $scope.safeApply();
+                    notifyTimeout = false;
+                    setTimeout(function() {
+                        document.getElementById("notify").style.display = "none";
+                    }, 500);
+                }, 3000);
+            };
+
+            $scope.loggedIn = false;
+
+            $scope.login = function(user, pass) {
+                if(!user || !pass) {
+                    $scope.notify("Vous devez saisir un nom d'utilisateur et un mot de passe");
+                    return;
+                }
+
+                send({ $: "login", user: user, pass: pass });
+            };
+
+            $scope.loginSuccess = function() {
+                $scope.loggedIn = true;
+                $scope.safeApply();
+            };
+
+            $s.serverList = {};
+
+            $s.parseSnapshot = function(ss) {
+                var matches = ss.match(/^(.*)-snapshot-(\d+)\.zip/);
+                if(!matches) {
+                    $s.notify("Unable to parse snapshot id: " + ss);
+                    throw new Error();
+                }
+
+                var date = new Date(matches[2] * 1);
+
+                var infos = {
+                    world: matches[1],
+                    year: date.getFullYear(),
+                    month: date.getMonth() + 1,
+                    day: date.getDate(),
+                    hour: date.getHours(),
+                    min: date.getMinutes(),
+                    sec: date.getSeconds()
+                };
+
+                return infos;
+            };
+
+            $s.formatTime = function(parts, glue) {
+                parts = parts.map(function(part) {
+                    return (Number(part) < 10) ? "0" + part : part;
+                });
+
+                return parts.join(glue);
+            }
+
+            $s.formatSnapshotDate = function(ss) {
+                ss = $s.parseSnapshot(ss);
+                return $s.formatTime([ss.day, ss.month, ss.year], "-") + " " + $s.formatTime([ss.hour, ss.min, ss.sec], ":");
+            };
+
+            $s.formatUptime = function(uptime) {
+                uptime = Number(uptime);
+                if(!uptime)
+                    return "Off";
+
+                uptime /= 1000;
+
+                var h = 0;
+                var m = 0;
+
+                if(uptime >= 3600) {
+                    h = Math.floor(uptime / 3600);
+                    uptime -= h * 3600;
+                }
+
+                if(uptime >= 60) {
+                    m = Math.floor(uptime / 60);
+                    uptime -= m * 60;
+                }
+
+                return $s.formatTime([h, m], ":");
+            };
+        });
+
+        var ws = new WebSocket("ws:team-njoy.net:8000");
+
+        function send(obj) {
+            ws.send(JSON.stringify(obj));
+        }
+
+        ws.onopen = function() {
+        };
+
+        ws.onmessage = function(msg) {
+            try {
+                msg = JSON.parse(msg.data);
+            } catch(e) {
+                $s.notify("Erreur de lecture du message: " + e);
+                return;
+            }
+
+            if(!msg.$)
+                return;
+
+            switch(msg.$) {
+                case "notify":
+                    $s.notify(msg.text);
+                    break;
+
+                case "kill":
+                    $s.kill(msg.error);
+                    break;
+
+                case "login":
+                    $s.loginSuccess();
+                    $s.send = send;
+                    break;
+
+                case "servers":
+                    for(var name in $s.serverList) {
+                        $s.serverList[name].gc = true
+                    }
+
+                    for(var name in msg.list) {
+                        if($s.serverList[name]) {
+                            for(var key in msg.list[name]) {
+                                $s.serverList[name][key] = msg.list[name][key];
+                            }
+                            delete $s.serverList[name].gc
+                        } else {
+                            $s.serverList[name] = msg.list[name]
+                        }
+                    }
+
+                    for(var name in $s.serverList) {
+                        if($s.serverList[name].gc)
+                            delete $s.serverList[name];
+                    }
+
+                    $s.safeApply();
+                    break;
+
+                case "pushConsole":
+                    if($s.serverList[msg.server]) {
+                        $s.serverList[msg.server].backlog.push(msg.line);
+                        $s.safeApply();
+                    }
+                    break;
+
+                default:
+                    $s.notify("unknown message type: " + msg.$);
+                    break;
+            }
+        };
+
+        ws.onclose = function() {
+            $s.kill("fermeture innopinée de la connexion");
+        };
+    </script>
+</head>
+<body ng-controller="main">
+    <div id="notify" ng-class="{ active: notifyVisible }">
+        {{ notifyText }}
+    </div>
+    <div id="login" class="box" ng-if="!loggedIn">
+        <form>
+            <div id="loginText">Galedric's</div>
+            <div id="loginText2">mcManager</div>
+            <input type="input" ng-model="loginUser" placeholder="Username" />
+            <input type="password" ng-model="loginPass" placeholder="Password" />
+            <button ng-click="login(loginUser, loginPass)">Login</button>
+        </form>
+    </div>
+    <div id="main" class="box" ng-if="loggedIn">
+        <div id="mainBtn">
+            <button ng-click="send({ $: 'rescan' })"><i class="icon-arrows-cw"></i></button>
+            <button ng-click="send({ $: 'crash' })"><i class="icon-extinguisher"></i></button>
+        </div>
+        <div class="server" ng-repeat="(name, server) in serverList">
+            <div class="status" ng-class="{ off: server.status == 0, pending: server.status == 1, on: server.status == 2 }"></div>
+            <div class="buttons">
+                <button title="On / Off" ng-click="send({ $: (server.status > 0 ? 'stop' : 'start'), server: name })" ng-disabled="server.status < 0"><i class="icon-off"></i></button>
+                <button title="Console" ng-click="server.showPanel = server.showPanel == 'console' ? '' : 'console'" ng-disabled="server.status < 0"><i class="icon-terminal"></i></button>
+                <button title="Snapshot" ng-click="server.showPanel = server.showPanel == 'snapshots' ? '' : 'snapshots'" ng-disabled="server.status < 0"><i class="icon-camera"></i></button>
+                <button title="Kill" ng-click="send({ $: 'kill', server: name })" ng-disabled="server.status < 0"><i class="icon-flash"></i></button>
+            </div>
+            <h2>{{ name }} <span>{{ server.jar }}</span></h2>
+            <ul class="serverInfos" ng-if="server.status >= 0">
+                <li>
+                    <i class="icon-globe"></i> {{ server.port }}
+                </li>
+                <li>
+                    <i class="icon-users"></i> {{ server.players }}<span style="color: #999">/{{ server.properties['max-players'] }}</span>
+                </li>
+                <li>
+                    <i class="icon-clock"></i> {{ formatUptime(server.uptime) }}
+                </li>
+                <li>
+                    <i class="icon-camera"></i> {{ server.snapshots.length }}
+                </li>
+                <li>
+                    <i class="icon-cog"></i> {{ server.engine }}
+                </li>
+                <li ng-if="server.scripted">
+                    <i class="icon-code"></i> Scripté
+                </li>
+            </ul>
+            <ul class="serverInfos" ng-if="server.status < 0">
+                <li>
+                    <i class="icon-attention"></i> Unmanaged
+                </li>
+            </ul>
+            <div ng-if="server.showPanel == 'console'">
+                <div class="serverConsole">
+                    <div class="serverConsoleBody">
+                        <div class="serverConsoleLine" ng-repeat="line in server.backlog track by $index">
+                            {{ line }}
+                        </div>
+                    </div>
+                </div>
+                <form ng-submit="send({ $: 'cmd', server: name, cmd: consoleCmd }); consoleCmd = '';" ng-if="server.status == 2">
+                    <input class="serverConsoleInput" ng-model="consoleCmd" type="text" placeholder="commande">
+                </form>
+            </div>
+            <div ng-if="server.showPanel == 'snapshots'">
+                <table class="serverSnapshots">
+                    <tr class="serverSnapshot" ng-repeat="snapshot in server.snapshots">
+                        <td class="serverSnapshotWorld"><i class="icon-folder"></i> {{ parseSnapshot(snapshot).world }}</td>
+                        <td class="serverSnapshotDate">{{ formatSnapshotDate(snapshot) }}</td>
+                        <td class="serverSnapshotBtns">
+                            <button ng-click="send({ $: 'snapRestore', world: parseSnapshot(snapshot).world, server: name, snapshot: snapshot })" title="Restaurer"><i class="icon-export"></i></button>
+                            <button ng-click="send({ $: 'snapDelete', server: name, snapshot: snapshot })" title="Effacer"><i class="icon-trash"></i></button>
+                        </td>
+                    </tr>
+                </table>
+                <div ng-if="!server.snapshots.length">
+                    <em>Aucune snapshot disponible</em>
+                </div>
+                <form class="serverSnapshotCreate">
+                    <select ng-model="snapshotWorld" ng-options="value as value for value in server.worlds"></select>
+                    <button ng-click="send({ $: 'snapCreate', server: name, world: snapshotWorld })" title="Créer le snapshot"><i class="icon-camera"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="bsod" ng-if="dead">
+        <div id="bsodText">
+            <div id="bsodTitle">Fatal Error</div>
+            La connexion vers le serveur mcManager a été perdue.<br><br>
+            Error: {{ bsodText }}<br><br>
+            Actualisez la page pour réessayer
+        </div>
+    </div>
+</body>
+</html>
