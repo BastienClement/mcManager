@@ -1,0 +1,10 @@
+{
+	"name": "mcManager",
+	"version": "0.1.0",
+	"license": "MIT",
+	"description": "Command-line torrent downloader and HTTP streaming server",
+	"dependencies": {
+		"websocket": "*"
+	},
+	"private": true
+}
