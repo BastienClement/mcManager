@@ -35,11 +35,11 @@ var config = require("./config");
 // Servers
 //
 // Front cache
-var front_end = fs.readFileSync(root + "/front.html");
+var front_end = fs.readFileSync(root + "/app/front.html");
 
 // HTTP Server
 var server = http.createServer(function(req, res) {
-    res.write(fs.readFileSync(root + "/front.html"));
+    res.write(fs.readFileSync(root + "/app/front.html"));
     res.end();
 });
 
@@ -198,7 +198,7 @@ function ServerEngineCommon() {
         this.scripts.onLoad();
     };
     this.scanScripts();
-    
+
     // Returns additional Java parameters
     this.getJavaParams = function() {
         return [];
